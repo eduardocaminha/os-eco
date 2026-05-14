@@ -1,19 +1,22 @@
 # os-eco Branding & Standards
 
 Canonical reference for visual identity, CLI conventions, and consistency standards
-across the os-eco tooling ecosystem (mulch, seeds, sapling, canopy, overstory).
+across the os-eco tooling ecosystem (mulch, seeds, canopy, sapling, burrow, overstory, warren, greenhouse).
 
-Last verified: 2026-03-04 (full audit with per-file evidence).
+Last verified: 2026-03-05 (full audit with per-file evidence). Burrow and Warren added 2026-05-13, audit pending.
 
 ## Status
 
 | Tool | Version | Branding | CLI Standards | Remaining |
 |------|---------|----------|---------------|-----------|
-| Mulch | 0.6.3 | complete | complete | — |
-| Seeds | 0.2.5 | complete | complete | — |
-| Sapling | 0.3.0 | complete | complete | — |
-| Canopy | 0.2.1 | complete | complete | — |
-| Overstory | 0.8.4 | complete | complete | — |
+| Mulch | 0.10.0 | complete | complete | — |
+| Seeds | 0.4.4 | complete | complete | — |
+| Canopy | 0.2.4 | complete | complete | — |
+| Sapling | 0.3.2 | complete | complete | — |
+| Burrow | 0.3.0 | pending | pending | Full audit against visual-spec.md + cli-standards.md |
+| Overstory | 0.11.0 | complete | complete | — |
+| Warren | 0.3.0 | pending | pending | Full audit against visual-spec.md + cli-standards.md |
+| Greenhouse | 0.1.2 | partial | partial | Style A help, Set D icons, -q flag, process.exitCode, typo suggestions, completions, upgrade, doctor --fix |
 
 ## Quick Start
 

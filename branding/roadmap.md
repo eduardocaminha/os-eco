@@ -4,6 +4,21 @@ Future work beyond the immediate CLI harmonization and branding.
 
 ---
 
+## Greenhouse CLI Standards Gaps
+
+Greenhouse (v0.1.2) is the newest tool and has several standards to catch up on:
+
+1. **Help screen Style A** — branded header with tool name in brand color + bold, version muted
+2. **Status icons Set D** — migrate from circular icons (○ ◎ ◉) to `- > x !`
+3. **`-q` short flag** — add to existing `--quiet` option
+4. **`process.exitCode = 1`** — replace `process.exit()` in poll, start, stop, ingest commands
+5. **Typo suggestions** — add Levenshtein "did you mean?" for unknown commands
+6. **Shell completions** — add `completions <shell>` subcommand (bash/zsh/fish)
+7. **Upgrade command** — add `grhs upgrade` with `--check` and `--json`
+8. **Doctor `--fix`** — add auto-remediation to existing doctor command
+
+---
+
 ## @os-eco/cli-common Shared Package
 
 A dev-time shared package (not a runtime dep) to prevent drift across tools.
@@ -28,7 +43,7 @@ Each tool copies/bundles what it needs at build time, preserving the zero-runtim
 Alternatively, just import directly since Bun resolves workspace deps at runtime anyway.
 
 ### When to build this
-All five tools now use commander + chalk. Patterns have largely converged:
+The original six tools all use commander + chalk; burrow and warren joined post-V1 and their stacks haven't been audited against this spec yet. Patterns across the core six have largely converged:
 - Common output helpers: `printSuccess()`, `printError()`, `printWarning()`
 - Shared palette: brand color + accent (amber) + muted (stone gray)
 - Status icon set D: `- > x !`
@@ -40,7 +55,7 @@ All five tools now use commander + chalk. Patterns have largely converged:
 
 ## CI Parity
 
-All five repos should use an identical GitHub Actions workflow structure. Seeds already has CI + auto-publish to npm.
+All eight repos should use an identical GitHub Actions workflow structure. Seeds already has CI + auto-publish to npm.
 
 ```yaml
 # .github/workflows/ci.yml
@@ -90,7 +105,7 @@ $ sd list --timing
 - Output goes to stderr (doesn't interfere with `--json` piping)
 - Format: `Done in <N>ms` in muted text
 
-**Status:** Complete across all five tools.
+**Status:** Complete across the original six tools. Burrow + warren audit pending.
 
 ---
 
@@ -113,9 +128,9 @@ This requires:
 
 ---
 
-## Shell Completions — Done
+## Shell Completions — Done (5/8)
 
-All five tools now ship completions for bash, zsh, and fish via a `completions <shell>` subcommand.
+Five tools (mulch, seeds, canopy, overstory, sapling) now ship completions for bash, zsh, and fish via a `completions <shell>` subcommand. Greenhouse still needs this; burrow + warren joined post-V1 and their support is unaudited.
 
 ```bash
 # Generate and install
@@ -124,9 +139,10 @@ cn completions bash > /etc/bash_completion.d/cn
 mulch completions fish > ~/.config/fish/completions/mulch.fish
 ov completions zsh > ~/.zfunc/_ov
 sp completions fish > ~/.config/fish/completions/sp.fish
+# grhs completions zsh — not yet implemented
 ```
 
-**Status:** Complete across all five tools.
+**Status:** Complete for mulch, seeds, canopy, overstory, sapling. Greenhouse pending. Burrow + warren audit pending.
 
 ---
 
@@ -175,11 +191,14 @@ os-eco ecosystem status
 
 Tool          Version    Status     Health
 ─────────────────────────────────────────────
-mulch    ml   0.6.3      - latest   ✓ 8/8 checks
-seeds    sd   0.2.5      - latest   ✓ 9/9 checks
-sapling  sp   0.3.0      - latest   ✓ 3/3 checks
-canopy   cn   0.2.1      - latest   ✓ 8/8 checks
-overstory ov  0.8.4      - latest   ✓ 11/11 checks
+mulch     ml    0.10.0   - latest   ✓ 8/8 checks
+seeds     sd    0.4.4    - latest   ✓ 10/10 checks
+canopy    cn    0.2.4    - latest   ✓ 6/6 checks
+sapling   sp    0.3.2    - latest   ✓ 3/3 checks
+burrow    bw    0.3.0    - latest   - audit pending
+overstory ov    0.11.0   - latest   ✓ 11/11 checks
+warren    wr    0.3.0    - latest   - audit pending
+greenhouse grhs 0.1.2    - latest   ✓ 6/6 checks
 
 Last sync: 2 minutes ago
 Active agents: 3  |  Open issues: 12  |  Prompts: 7

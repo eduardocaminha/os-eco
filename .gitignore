@@ -1,8 +1,13 @@
 # Sub-repos (independently managed)
+burrow/
 canopy/
 greenhouse/
 mulch/
 overstory/
 sapling/
 seeds/
+warren/
+
+# Generated
+.run-plan-logs/
 .DS_Store

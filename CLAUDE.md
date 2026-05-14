@@ -1,32 +1,60 @@
 # os-eco
 
-Meta-project for the AI agent tooling ecosystem. This repo tracks cross-cutting concerns across six integrated tools, each living in its own sub-repo.
+Meta-project for the AI agent tooling ecosystem. This repo tracks cross-cutting concerns across eight integrated tools, each living in its own sub-repo.
 
 ## Ecosystem Overview
+
+Tools are grouped by role: **primitives** store the data agents need, **runtimes** execute a single agent, **orchestrators** coordinate many agents, and the **daemon** closes the autonomous loop.
+
+### Primitives — context, issues, prompts
 
 | Tool | CLI | npm | Purpose | Sub-repo |
 |------|-----|-----|---------|----------|
 | **Mulch** | `mulch` / `ml` | `@os-eco/mulch-cli` | Structured expertise management | `mulch/` |
 | **Seeds** | `sd` | `@os-eco/seeds-cli` | Git-native issue tracking | `seeds/` |
 | **Canopy** | `cn` | `@os-eco/canopy-cli` | Prompt management & composition | `canopy/` |
-| **Overstory** | `overstory` / `ov` | `@os-eco/overstory-cli` | Multi-agent orchestration | `overstory/` |
+
+### Runtimes — single-agent execution
+
+| Tool | CLI | npm | Purpose | Sub-repo |
+|------|-----|-----|---------|----------|
 | **Sapling** | `sapling` / `sp` | `@os-eco/sapling-cli` | Headless coding agent with proactive context management | `sapling/` |
-| **Greenhouse** | `greenhouse` / `grhs` | `@os-eco/greenhouse-cli` | Autonomous development daemon | `greenhouse/` |
+| **Burrow** | `burrow` / `bw` | `@os-eco/burrow-cli` | OS-isolated sandbox runtime for coding agents (bwrap / sandbox-exec) | `burrow/` |
 
-### Relationship Graph
+### Orchestrators — multi-agent coordination
+
+| Tool | CLI | npm | Purpose | Sub-repo |
+|------|-----|-----|---------|----------|
+| **Overstory** | `overstory` / `ov` | `@os-eco/overstory-cli` | Local multi-agent orchestration via tmux + git worktrees | `overstory/` |
+| **Warren** | `warren` | `@os-eco/warren-cli` | Self-hostable control plane for ephemeral cloud agents | `warren/` |
+
+### Daemon — autonomous loop
+
+| Tool | CLI | npm | Purpose | Sub-repo |
+|------|-----|-----|---------|----------|
+| **Greenhouse** | `greenhouse` / `grhs` | `@os-eco/greenhouse-cli` | Polls GitHub, dispatches runs, opens PRs | `greenhouse/` |
+
+### How they fit together
 
 ```
-greenhouse (polls GitHub → dispatches overstory → opens PRs)
-  └── overstory (orchestrates agents)
-        ├── sapling (headless coding agent, alternative runtime)
-        ├── mulch (stores expertise for agents)
-        ├── seeds (tracks issues agents work on)
-        └── canopy (manages prompts agents use)
+greenhouse                       autonomous outer loop (GitHub → dispatch → PR)
+   │
+   ├─► overstory  (local)        orchestrators spawn and coordinate agents
+   └─► warren     (cloud)
+          │
+          ├─► sapling             runtimes execute a single agent
+          └─► burrow              (warren embeds burrow for sandboxed runs)
+                 │
+                 ├─► mulch        primitives feed agents context
+                 ├─► seeds        (expertise, work queue, prompts)
+                 └─► canopy
 ```
 
-- **Greenhouse** closes the last manual loop — polls GitHub for triaged issues, creates seeds tasks, dispatches overstory runs, and opens PRs
-- **Overstory** spawns and coordinates agents (Claude Code or Sapling); reads issues from seeds, expertise from mulch
-- **Sapling** is a headless coding agent with proactive context management — an alternative runtime for overstory to dispatch to
+- **Greenhouse** closes the last manual loop — polls GitHub for triaged issues, creates seeds tasks, dispatches an orchestrator run, opens PRs
+- **Overstory** is the local orchestrator — tmux + git worktrees, top-down decomposition, SQLite mail
+- **Warren** is the cloud orchestrator — a self-hostable HTTP/UI control plane that runs each agent inside a burrow sandbox
+- **Sapling** is a headless coding agent — an alternative runtime overstory/warren can dispatch to alongside Claude Code
+- **Burrow** is the sandbox primitive — bwrap on Linux, sandbox-exec on macOS; used directly or embedded inside warren
 - **Mulch** is passive — agents call `ml record` / `ml prime` to store and retrieve expertise
 - **Seeds** is the issue tracker — `sd create` / `sd ready` / `sd close` drive the work queue
 - **Canopy** manages prompt templates — `cn emit` renders prompts for agent consumption
@@ -46,24 +74,19 @@ The root `.mulch/`, `.seeds/`, `.canopy/`, and `.overstory/` directories are for
 All tools use Bun. Run from the respective sub-repo:
 
 ```bash
-# Mulch
-cd mulch && bun test && bun run lint && bun run typecheck
-
-# Seeds
-cd seeds && bun test && bun run lint && bun run typecheck
-
-# Canopy
-cd canopy && bun test && bun run lint && bun run typecheck
-
-# Overstory
-cd overstory && bun test && bun run lint && bun run typecheck
-
-# Sapling
-cd sapling && bun test && bun run lint && bun run typecheck
-
-# Greenhouse
-cd greenhouse && bun test && bun run lint && bun run typecheck
+cd mulch       && bun test && bun run lint && bun run typecheck
+cd seeds       && bun test && bun run lint && bun run typecheck
+cd canopy      && bun test && bun run lint && bun run typecheck
+cd sapling     && bun test && bun run lint && bun run typecheck
+cd burrow      && bun test && bun run lint && bun run typecheck
+cd overstory   && bun test && bun run lint && bun run typecheck
+cd warren      && bun test && bun run lint && bun run typecheck
+cd greenhouse  && bun test && bun run lint && bun run typecheck
 ```
+
+## Scripts
+
+- `scripts/run-plan.sh <plan-id>` — sequential, non-parallel alternative to `ov sling`. For each open child of a seeds plan, runs `claude -p "work on sd <id>..."` with `--permission-mode bypassPermissions`, logs to `.run-plan-logs/<plan>/<id>.log`, stops on the first non-zero exit. Idempotent: skips closed children on re-runs. Requires `sd`, `claude`, `jq` on PATH.
 
 ## Conventions
 
@@ -74,7 +97,7 @@ cd greenhouse && bun test && bun run lint && bun run typecheck
 
 <!-- mulch:start -->
 ## Project Expertise (Mulch)
-<!-- mulch-onboard-v:1 -->
+<!-- mulch-onboard-v:2 -->
 
 This project uses [Mulch](https://github.com/jayminwest/mulch) for structured expertise management.
 
@@ -83,24 +106,30 @@ This project uses [Mulch](https://github.com/jayminwest/mulch) for structured ex
 ml prime
 ```
 
-This injects project-specific conventions, patterns, decisions, and other learnings into your context.
-Use `ml prime --files src/foo.ts` to load only records relevant to specific files.
+Injects project-specific conventions, patterns, decisions, failures, references, and guides into
+your context. Run `ml prime --files src/foo.ts` before editing a file to load only records
+relevant to that path (per-file framing, classification age, and confirmation scores included).
 
-**Before completing your task**, review your work for insights worth preserving — conventions discovered,
-patterns applied, failures encountered, or decisions made — and record them:
+**Before completing your task**, record insights worth preserving — conventions discovered,
+patterns applied, failures encountered, or decisions made:
 ```bash
 ml record <domain> --type <convention|pattern|failure|decision|reference|guide> --description "..."
 ```
 
-Link evidence when available: `--evidence-commit <sha>`, `--evidence-bead <id>`
+Evidence auto-populates from git (current commit + changed files). Link explicitly with
+`--evidence-seeds <id>` / `--evidence-gh <id>` / `--evidence-linear <id>` / `--evidence-bead <id>`,
+`--evidence-commit <sha>`, or `--relates-to <mx-id>`. Upserts of named records merge outcomes
+instead of replacing them; validation failures print a copy-paste retry hint with missing fields
+pre-filled.
 
-Run `ml status` to check domain health and entry counts.
-Run `ml --help` for full usage.
-Mulch write commands use file locking and atomic writes — multiple agents can safely record to the same domain concurrently.
+Run `ml status` for domain health, `ml doctor` to check record integrity (add `--fix` to strip
+broken file anchors), `ml --help` for the full command list. Write commands use file locking and
+atomic writes, so multiple agents can record concurrently. Expertise survives `git worktree`
+cleanup — `.mulch/` resolves to the main repo.
 
 ### Before You Finish
 
-1. Discover what to record:
+1. Discover what to record (shows changed files and suggests domains):
    ```bash
    ml learn
    ```

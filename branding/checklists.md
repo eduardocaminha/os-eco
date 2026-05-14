@@ -1,11 +1,11 @@
 # Implementation Checklists
 
 Per-tool TODO lists. Check items off as work is completed.
-Last verified: 2026-03-04 (full audit with per-file evidence).
+Last full audit: 2026-03-05 against the versions noted in each tool's heading. Burrow and warren joined post-V1 (added 2026-05-13) and their audit is pending. Version headings below reflect current shipped versions; any divergence from the audit baseline is a re-audit candidate.
 
 ---
 
-## Mulch (v0.6.3)
+## Mulch (v0.10.0)
 
 ### Branding — Complete
 - [x] Apply forest palette (brand: `rgb(139, 90, 43)`, accent, muted) — done (v0.6.0, palette.ts)
@@ -33,7 +33,7 @@ Last verified: 2026-03-04 (full audit with per-file evidence).
 
 ---
 
-## Seeds (v0.2.5) — Fully Complete
+## Seeds (v0.4.4) — Fully Complete
 
 ### Branding — Complete
 - [x] Apply forest palette (brand: `rgb(124, 179, 66)`, accent, muted) — done (v0.2.2)
@@ -57,11 +57,11 @@ Last verified: 2026-03-04 (full audit with per-file evidence).
 
 ### Commands — Complete
 - [x] Add `sd upgrade` command (self-update from npm) — done (v0.2.2)
-- [x] Add `sd doctor` command (9 checks, `--fix`, `--json`) — done
+- [x] Add `sd doctor` command (10 checks, `--fix`, `--json`) — done
 
 ---
 
-## Canopy (v0.2.1) — Fully Complete
+## Canopy (v0.2.4) — Fully Complete
 
 ### Branding — Complete
 - [x] Apply forest palette (brand: `rgb(56, 142, 60)`, accent, muted) — done (v0.1.5)
@@ -70,7 +70,7 @@ Last verified: 2026-03-04 (full audit with per-file evidence).
 - [x] Adopt message format standards (`✓ ✗ !`) — done (v0.1.5, fmt helpers in output.ts)
 
 ### CLI Standards — Complete
-- [x] Remove dual-track arg parsing (commander-only) — done (register pattern, all 23 commands)
+- [x] Remove dual-track arg parsing (commander-only) — done (register pattern, all 22 commands)
 - [x] Add `--version --json` (rich metadata output) — done (v0.1.6, outputs name/version/runtime/platform)
 - [x] Add `--quiet, -q` global flag — done (v0.1.6, setQuiet in output.ts)
 - [x] Add `--verbose` global flag — done (v0.1.6, used by doctor command)
@@ -79,21 +79,21 @@ Last verified: 2026-03-04 (full audit with per-file evidence).
 - [x] Add `--timing` flag — done (v0.1.9, global flag, outputs to stderr)
 
 ### Commands — Complete
-- [x] Implement `cn doctor` (8 checks, `--fix`, `--json`) — done (v0.1.6)
+- [x] Implement `cn doctor` (6 checks, `--fix`, `--json`) — done (v0.1.6)
 - [x] Add `cn upgrade` command (self-update from npm) — done (v0.1.6, with `--check` and `--json`)
 
 ---
 
-## Overstory (v0.8.4) — Fully Complete
+## Overstory (v0.11.0) — Fully Complete
 
 ### Branding — Complete
 - [x] Apply forest palette (brand: `rgb(46, 125, 50)`, accent, muted) — done (v0.6.3, color.ts)
-- [x] Adopt help screen style A (see visual-spec.md) — done (v0.6.8, branded header in index.ts, verified v0.8.4)
+- [x] Adopt help screen style A (see visual-spec.md) — done (v0.6.8, branded header in index.ts, verified v0.8.5)
 - [x] Adopt status icon set D (`- > x !`) — done (v0.6.6, migrated dashboard + all commands)
 - [x] Adopt message format standards (`✓ ✗ !`) — done (v0.6.6, fmt helpers in color.ts)
 
 ### CLI Standards — Complete
-- [x] Migrate arg parsing to commander (~32 command files) — done (v0.6.3)
+- [x] Migrate arg parsing to commander (~34 command files) — done (v0.6.3)
 - [x] Replace raw ANSI with chalk — done (v0.6.2, chalk v5)
 - [x] Standardize version output (bare semver) — done (VERSION constant is bare semver)
 - [x] Add `--version --json` (rich metadata output) — done (v0.6.8, JSON envelope with name/version/runtime/platform)
@@ -112,54 +112,144 @@ Last verified: 2026-03-04 (full audit with per-file evidence).
 
 ---
 
-## Sapling (v0.3.0) — Fully Complete
+## Sapling (v0.3.2) — Fully Complete
 
 ### Branding
 - [x] Apply forest palette (brand: `rgb(76, 175, 80)`, accent, muted) — done (v0.1.1, color.ts with exact RGB)
 - [x] Adopt help screen style A (see visual-spec.md) — done (v0.3.0, brand.bold in index.ts)
-- [x] Adopt status icon set D (`- > x !`) — done (v0.1.1, icons object in color.ts, verified v0.3.0)
-- [x] Adopt message format standards (`✓ ✗ !`) — done (v0.1.1, printSuccess/Error/Warning in color.ts, verified v0.3.0)
+- [x] Adopt status icon set D (`- > x !`) — done (v0.1.1, icons object in color.ts, verified v0.3.1)
+- [x] Adopt message format standards (`✓ ✗ !`) — done (v0.1.1, printSuccess/Error/Warning in color.ts, verified v0.3.1)
 
 ### CLI Standards
 - [x] Migrate arg parsing to commander — done (v0.1.0, Commander v14.0.3)
 - [x] Replace raw ANSI with chalk — done (v0.1.0, chalk v5.6.2, centralized in logging/color.ts)
 - [x] Standardize version flag to `-v, --version` — done (v0.1.0, via Commander .version())
-- [x] Add `--version --json` (rich metadata output) — done (v0.1.1, outputs name/version/runtime/platform, verified v0.3.0)
-- [x] Move VERSION to `export const VERSION` in entry point — done (v0.1.0, index.ts, verified v0.3.0)
+- [x] Add `--version --json` (rich metadata output) — done (v0.1.1, outputs name/version/runtime/platform, verified v0.3.1)
+- [x] Move VERSION to `export const VERSION` in entry point — done (v0.1.0, index.ts, verified v0.3.1)
 - [x] Add `--quiet, -q` global flag — done (v0.1.0, suppresses output + disables color)
 - [x] Add `--verbose` global flag — done (v0.1.0, logs context manager decisions)
 - [x] Add `--json` flag — done (v0.1.0, NDJSON event output)
 - [x] Add `--timing` flag — done (v0.1.1, global flag, outputs to stderr)
-- [x] Switch JSON envelope to `{ success, command }` format — done (v0.1.1, json.ts with jsonOutput/jsonError helpers, verified v0.3.0)
-- [x] Switch to `process.exitCode = 1` (no hard exit) — done (v0.1.1, used throughout, verified v0.3.0)
-- [x] Add typo suggestions for unknown commands — done (v0.1.1, Levenshtein in typo.ts, verified v0.3.0)
-- [x] Add shell completions (`completions <shell>`) — done (v0.1.1, bash/zsh/fish, completions.ts, verified v0.3.0)
+- [x] Switch JSON envelope to `{ success, command }` format — done (v0.1.1, json.ts with jsonOutput/jsonError helpers, verified v0.3.1)
+- [x] Switch to `process.exitCode = 1` (no hard exit) — done (v0.1.1, used throughout, verified v0.3.1)
+- [x] Add typo suggestions for unknown commands — done (v0.1.1, Levenshtein in typo.ts, verified v0.3.1)
+- [x] Add shell completions (`completions <shell>`) — done (v0.1.1, bash/zsh/fish, completions.ts, verified v0.3.1)
 
 ### Commands
-- [x] Add `sp upgrade` command (with `--check` and `--json`) — done (v0.1.1, verified v0.3.0)
-- [x] Add `sp doctor` command (with `--fix` and `--json`) — done (v0.1.1, 3 checks, verified v0.3.0)
+- [x] Add `sp upgrade` command (with `--check` and `--json`) — done (v0.1.1, verified v0.3.1)
+- [x] Add `sp doctor` command (with `--fix` and `--json`) — done (v0.1.1, 3 checks, verified v0.3.1)
 
 ### Documentation
 - [x] README.md with install, CLI reference, architecture — done
 - [x] CHANGELOG.md in Keep a Changelog format — done
-- [x] Add badges to README (npm, CI, license) — done (v0.1.1, verified v0.3.0)
+- [x] Add badges to README (npm, CI, license) — done (v0.1.1, verified v0.3.1)
+
+---
+
+## Burrow (v0.3.0) — Audit Pending
+
+Brand color: `rgb(121, 85, 72)` (warm clay). Joined the ecosystem 2026-05-13. No items below have been verified against burrow's actual source — schedule a full audit against `visual-spec.md` + `cli-standards.md`.
+
+### Branding — Pending
+- [ ] Apply forest palette (brand: `rgb(121, 85, 72)`, accent, muted)
+- [ ] Adopt help screen style A (see visual-spec.md)
+- [ ] Adopt status icon set D (`- > x !`)
+- [ ] Adopt message format standards (`✓ ✗ !`)
+
+### CLI Standards — Pending
+- [ ] Commander + chalk arg parsing
+- [ ] `-v, --version` flag with `--version --json` rich metadata
+- [ ] Global flags: `--json`, `--quiet, -q`, `--verbose`, `--timing`
+- [ ] `process.exitCode = 1` (no hard exit)
+- [ ] `{ success, command }` JSON envelope
+- [ ] Typo suggestions for unknown commands
+- [ ] Shell completions (`completions <shell>`)
+
+### Commands — Pending
+- [ ] `burrow upgrade` (with `--check` and `--json`)
+- [ ] `burrow doctor` (with `--fix` and `--json`)
+
+### Documentation
+- [x] README.md with install, CLI reference, badges — done (verified 2026-05-13)
+- [x] CHANGELOG.md — done
+
+---
+
+## Warren (v0.3.0) — Audit Pending
+
+Brand color: `rgb(82, 105, 110)` (slate). Joined the ecosystem 2026-05-13. No items below have been verified against warren's actual source — schedule a full audit against `visual-spec.md` + `cli-standards.md`.
+
+### Branding — Pending
+- [ ] Apply forest palette (brand: `rgb(82, 105, 110)`, accent, muted)
+- [ ] Adopt help screen style A (see visual-spec.md)
+- [ ] Adopt status icon set D (`- > x !`)
+- [ ] Adopt message format standards (`✓ ✗ !`)
+
+### CLI Standards — Pending
+- [ ] Commander + chalk arg parsing
+- [ ] `-v, --version` flag with `--version --json` rich metadata
+- [ ] Global flags: `--json`, `--quiet, -q`, `--verbose`, `--timing`
+- [ ] `process.exitCode = 1` (no hard exit)
+- [ ] `{ success, command }` JSON envelope
+- [ ] Typo suggestions for unknown commands
+- [ ] Shell completions (`completions <shell>`)
+
+### Commands — Pending
+- [ ] `warren upgrade` (with `--check` and `--json`)
+- [ ] `warren doctor` (with `--fix` and `--json`)
+
+### Documentation
+- [x] README.md with install, CLI reference, badges — done (verified 2026-05-13)
+- [x] CHANGELOG.md — done
+
+---
+
+## Greenhouse (v0.1.2) — In Progress
+
+### Branding — Partial
+- [x] Apply forest palette (brand: `rgb(124, 179, 66)`, accent, muted) — done (v0.1.0, output.ts)
+- [ ] Adopt help screen style A (see visual-spec.md) — uses Commander default, not branded header with tool name in brand color + bold, version muted, tagline
+- [ ] Adopt status icon set D (`- > x !`) — uses custom circular icons (○ ◎ ◉ ⬆ ✓ ✗) instead of Set D
+- [x] Adopt message format standards (`✓ ✗ !`) — done (v0.1.0, printSuccess/Error/Warning in output.ts)
+
+### CLI Standards — Partial
+- [x] Migrate arg parsing to commander — done (v0.1.0, all 12 commands)
+- [x] Replace raw ANSI with chalk — done (v0.1.0, chalk v5.6.2)
+- [x] Standardize version flag to `-v, --version` — done (v0.1.0)
+- [x] Add `--version --json` (rich metadata output) — done (v0.1.0, outputs name/version/runtime/platform)
+- [x] Move VERSION to `export const VERSION` in entry point — done (v0.1.0, cli.ts)
+- [ ] Add `--quiet, -q` global flag — `--quiet` exists but missing `-q` short form
+- [x] Add `--verbose` global flag — done (v0.1.0)
+- [x] Add `--timing` flag — done (v0.1.0, outputs to stderr)
+- [x] Add `--json` flag — done (v0.1.0)
+- [ ] Switch to `process.exitCode = 1` (no hard exit) — mixed: some commands use process.exit(), others use process.exitCode
+- [ ] Add typo suggestions for unknown commands — generic "Run 'grhs --help'" message, no Levenshtein
+- [ ] Add shell completions (`completions <shell>`) — not implemented
+
+### Commands — Partial
+- [ ] Add `grhs upgrade` command (with `--check` and `--json`) — not implemented
+- [x] Add `grhs doctor` command (6 checks, `--json`) — done, but missing `--fix` flag
+
+### Documentation
+- [x] README.md with install, CLI reference, badges (npm, CI, license) — done
+- [x] CHANGELOG.md in Keep a Changelog format — done
 
 ---
 
 ## Cross-Cutting
 
 ### Documentation
-- [x] Unify all sub-repo READMEs to template (see documentation.md) — done (all four follow canonical structure)
-- [x] Add consistent badge set to all repos (npm, CI, license) — done (all four repos have badges)
-- [x] Adopt Keep a Changelog format in all repos — done (all four have CHANGELOG.md)
-- [x] Ensure `npx @os-eco/<tool>-cli` works for all tools — done (all four return version via npx)
-- [x] Update root os-eco README as ecosystem landing page — done (ecosystem landing page with logo, workflow example, design principles)
-- [x] Align `.claude/commands/` across all sub-repos — done (all 4 sub-repos have prioritize, release, issue-reviews, pr-reviews; all managed via Canopy `cn emit`)
+- [x] Unify all sub-repo READMEs to template (see documentation.md) — done for the original six (burrow + warren audit pending)
+- [x] Add consistent badge set to all repos (npm, CI, license) — done for all eight repos
+- [x] Adopt Keep a Changelog format in all repos — done for the original six (burrow + warren have CHANGELOG.md; format audit pending)
+- [x] Ensure `npx @os-eco/<tool>-cli` works for all tools — done for the original six (burrow + warren audit pending)
+- [x] Update root os-eco README as ecosystem landing page — done (8-tool layered ecosystem landing page with logo, workflow example, design principles)
+- [x] Align `.claude/commands/` across all sub-repos — done for the original six; burrow + warren pending
 
 ### Infrastructure
 - [ ] Standardize CI workflows across all repos
 - [ ] Add version-sync CI check (package.json vs VERSION constant) — Seeds has this, Canopy doctor checks it
-- [ ] Create `@os-eco/cli-common` shared package — all 5 tools on commander+chalk now, ready to extract
+- [ ] Create `@os-eco/cli-common` shared package — the original six tools all on commander+chalk and ready to extract; consume from burrow + warren once they're audited onto the same stack
 
 ### Future
 - [ ] Cross-tool JSON piping tests

@@ -1,6 +1,6 @@
 # CLI Standards
 
-Technical conventions that all five tools must follow.
+Technical conventions that all tools must follow. The original six tools (mulch, seeds, canopy, sapling, overstory, greenhouse) are fully audited against this spec. Burrow (v0.3.0) and warren (v0.3.0) joined post-V1 — their compliance with this spec is not yet audited and is tracked as pending in `checklists.md`.
 
 ---
 
@@ -12,11 +12,12 @@ All tools use `commander` (v14+) for arg parsing and `chalk` (v5+) for color out
 |------|-----------|-------|--------|
 | Mulch | yes | yes | done (v0.6.0) |
 | Seeds | yes | yes | done (v0.2.1) |
-| Canopy | yes | yes | done (v0.2.1, register pattern) |
-| Overstory | yes | yes | done (v0.8.4) |
-| Sapling | yes | yes | done (v0.3.0) |
+| Canopy | yes | yes | done (v0.2.2, register pattern) |
+| Overstory | yes | yes | done (v0.8.5) |
+| Sapling | yes | yes | done (v0.3.1) |
+| Greenhouse | yes | yes | done (v0.1.0) |
 
-All five tools are fully migrated to Commander + Chalk.
+All six original tools are fully migrated to Commander + Chalk. Burrow and warren audit pending.
 
 ---
 
@@ -35,16 +36,14 @@ Every tool must support these flags:
 
 ### Current status
 
-All five tools fully implement all global flags.
-
-| Flag | Mulch | Seeds | Canopy | Overstory | Sapling |
-|------|-------|-------|--------|-----------|---------|
-| `-v, --version` | done | done | done | done | done |
-| per-command `--help` | done | done | done | done | done |
-| `--quiet, -q` | done | done | done | done | done |
-| `--verbose` | done | done | done | done | done |
-| `--json` | done | done | done | done | done |
-| `--timing` | done | done | done | done | done |
+| Flag | Mulch | Seeds | Canopy | Overstory | Sapling | Greenhouse |
+|------|-------|-------|--------|-----------|---------|------------|
+| `-v, --version` | done | done | done | done | done | done |
+| per-command `--help` | done | done | done | done | done | done |
+| `--quiet, -q` | done | done | done | done | done | `--quiet` only (missing `-q`) |
+| `--verbose` | done | done | done | done | done | done |
+| `--json` | done | done | done | done | done | done |
+| `--timing` | done | done | done | done | done | done |
 
 ---
 
@@ -52,7 +51,7 @@ All five tools fully implement all global flags.
 
 ```
 $ sd --version
-0.2.5
+0.4.4
 ```
 
 - Bare semver, no tool name prefix
@@ -61,7 +60,7 @@ $ sd --version
 ```json
 {
   "name": "@os-eco/seeds-cli",
-  "version": "0.2.5",
+  "version": "0.4.4",
   "runtime": "bun",
   "platform": "darwin-arm64"
 }
@@ -78,6 +77,7 @@ All tools: `export const VERSION = "<semver>"` in the entry point, kept in sync 
 | Canopy | `export const VERSION` in `src/index.ts` | done |
 | Overstory | `export const VERSION` in `src/index.ts` | done |
 | Sapling | `export const VERSION` in `src/index.ts` | done |
+| Greenhouse | `export const VERSION` in `src/cli.ts` | done |
 
 ---
 
@@ -95,10 +95,11 @@ All `--json` output uses this shape:
 | Mulch | yes | done |
 | Seeds | yes | done |
 | Canopy | yes | done |
-| Overstory | yes | done (v0.8.4, json.ts with jsonOutput/jsonError helpers) |
-| Sapling | yes | done (v0.3.0, json.ts with jsonOutput/jsonError helpers) |
+| Overstory | yes | done (v0.8.5, json.ts with jsonOutput/jsonError helpers) |
+| Sapling | yes | done (v0.3.1, json.ts with jsonOutput/jsonError helpers) |
+| Greenhouse | yes | done |
 
-All five tools use the standard `{ success, command }` envelope.
+All six original tools use the standard `{ success, command }` envelope. Burrow and warren audit pending.
 
 ### JSON error channel
 
@@ -121,8 +122,9 @@ Rationale: testable, allows cleanup/finally blocks to run.
 | Mulch | done (`process.exitCode = 1`) |
 | Seeds | done (`process.exitCode = 1`, migrated v0.2.1) |
 | Canopy | done (`ExitError` -> `process.exitCode`) |
-| Overstory | done (`process.exitCode = 1`; `process.exit(0)` only for SIGINT cleanup and --version --json early exit, v0.8.4) |
-| Sapling | done (`process.exitCode = 1`, v0.3.0) |
+| Overstory | done (`process.exitCode = 1`; `process.exit(0)` only for SIGINT cleanup and --version --json early exit, v0.8.5) |
+| Sapling | done (`process.exitCode = 1`, v0.3.1) |
+| Greenhouse | **mixed** — some commands use `process.exit()` (poll, start, stop, ingest), others use `process.exitCode` |
 
 ### Error codes
 
@@ -138,10 +140,11 @@ Every tool has a `doctor` command with `--fix` and `--json`.
 | Tool | Exists | --fix | --json | Status |
 |------|--------|-------|--------|--------|
 | Mulch | yes (8 checks) | yes | yes | done |
-| Seeds | yes (9 checks) | yes | yes | done |
-| Canopy | yes (8 checks) | yes | yes | done (v0.2.1) |
-| Overstory | yes (11 categories) | yes | yes | done (v0.8.4) |
-| Sapling | yes (3 checks) | yes | yes | done (v0.3.0) |
+| Seeds | yes (10 checks) | yes | yes | done |
+| Canopy | yes (6 checks) | yes | yes | done (v0.2.2) |
+| Overstory | yes (11 categories) | yes | yes | done (v0.8.5) |
+| Sapling | yes (3 checks) | yes | yes | done (v0.3.1) |
+| Greenhouse | yes (6 checks) | **no** | yes | missing `--fix` flag |
 
 ### Overstory ecosystem check (`ov doctor`)
 Verify sibling tools are:
@@ -169,35 +172,36 @@ sd upgrade --check      # check for updates without installing
 |------|---------|--------|
 | Mulch | `mulch upgrade` | done (with `--check` and `--json`) |
 | Seeds | `sd upgrade` | done (v0.2.2, with `--check` and `--json`) |
-| Canopy | `cn upgrade` | done (v0.2.1, with `--check` and `--json`) |
-| Overstory | `ov upgrade` + `ov upgrade --all` | done (v0.8.4, with `--check`, `--all`, `--json`) |
-| Sapling | `sp upgrade` | done (v0.3.0, with `--check` and `--json`) |
+| Canopy | `cn upgrade` | done (v0.2.2, with `--check` and `--json`) |
+| Overstory | `ov upgrade` + `ov upgrade --all` | done (v0.8.5, with `--check`, `--all`, `--json`) |
+| Sapling | `sp upgrade` | done (v0.3.1, with `--check` and `--json`) |
+| Greenhouse | — | **not implemented** |
 
 ### Behavior
 - Check npm registry for latest `@os-eco/<tool>-cli`
 - Compare with local VERSION
 - `--check`: print current vs latest, exit 0 if current, exit 1 if outdated
 - Default: install latest via `bun install -g @os-eco/<tool>-cli@latest`
-- `--json`: `{ "current": "0.8.4", "latest": "0.9.0", "upToDate": false }`
-- `ov upgrade --all`: update all five tools at once
+- `--json`: `{ "current": "0.11.0", "latest": "0.12.0", "upToDate": false }`
+- `ov upgrade --all`: update the core six tools at once (burrow + warren not yet integrated)
 
 ---
 
 ## Features to Propagate
 
-All features are now implemented across all five tools.
+Status counts below are against the original six (mulch, seeds, canopy, sapling, overstory, greenhouse). Burrow (v0.3.0) and warren (v0.3.0) joined post-V1 and are not yet audited — all rows are pending for those two.
 
-| Feature | Status | Notes |
-|---------|--------|-------|
-| `--quiet, -q` | all 5 | — |
-| `--verbose` | all 5 | — |
-| `--dry-run` (sync) | 4/5 | Sapling (N/A — no sync command) |
-| Per-command `--help` | all 5 | — |
-| Shell completions | all 5 | — |
-| `--timing` | all 5 | — |
-| Typo suggestions | all 5 | — |
-| `upgrade` command | all 5 | — |
-| `doctor` command | all 5 | — |
-| `--version --json` | all 5 | — |
-| `process.exitCode = 1` | all 5 | — |
-| `{ success, command }` JSON envelope | all 5 | — |
+| Feature | Status (core 6) | Notes |
+|---------|-----------------|-------|
+| `--quiet, -q` | 5/6 | Greenhouse missing `-q` short form |
+| `--verbose` | all 6 | — |
+| `--dry-run` (sync) | 4/6 | Sapling (N/A — no sync command), Greenhouse (N/A) |
+| Per-command `--help` | all 6 | — |
+| Shell completions | 5/6 | Greenhouse missing |
+| `--timing` | all 6 | — |
+| Typo suggestions | 5/6 | Greenhouse missing |
+| `upgrade` command | 5/6 | Greenhouse missing |
+| `doctor` command | all 6 | Greenhouse missing `--fix` |
+| `--version --json` | all 6 | — |
+| `process.exitCode = 1` | 5/6 | Greenhouse mixed |
+| `{ success, command }` JSON envelope | all 6 | — |

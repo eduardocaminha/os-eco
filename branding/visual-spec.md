@@ -17,7 +17,10 @@ Shared semantic colors handle status and feedback.
 | seeds | sprout green | `124, 179, 66` | `chalk.rgb(124, 179, 66)` |
 | sapling | young tree green | `76, 175, 80` | `chalk.rgb(76, 175, 80)` |
 | canopy | deep green | `56, 142, 60` | `chalk.rgb(56, 142, 60)` |
+| burrow | warm clay | `121, 85, 72` | `chalk.rgb(121, 85, 72)` |
 | overstory | forest green | `46, 125, 50` | `chalk.rgb(46, 125, 50)` |
+| warren | slate | `82, 105, 110` | `chalk.rgb(82, 105, 110)` |
+| greenhouse | sprout green | `124, 179, 66` | `chalk.rgb(124, 179, 66)` |
 
 ### Semantic Colors
 
@@ -54,9 +57,12 @@ The primary ecosystem logo. Each line uses that tool's brand color.
 Tool name bold, description dim.
 
 ```
+▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓  greenhouse  automation
+▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓  warren      cloud control plane
 ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓  overstory   orchestration
 ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓  canopy      prompts
 ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓  sapling     agents
+▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓  burrow      sandbox
 ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓  seeds       issues
 ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓  mulch       expertise
 ```
@@ -65,6 +71,8 @@ Use in:
 - Root-level README
 - `ov ecosystem` dashboard
 - Website / docs landing page
+
+Note: `logo.png` / `logo@2x.png` still show the original six layers — regenerate via `generate-logo.py` to include burrow + warren.
 
 ---
 
@@ -79,7 +87,9 @@ Maximum terminal compatibility. No unicode circles, no emoji.
 | `x` | closed / done | dim | `chalk.dim("x")` |
 | `!` | blocked / warning | yellow | `chalk.yellow("!")` |
 
-All four tools use these exact characters and colors for any status display.
+All tools use these exact characters and colors for any status display.
+
+Note: Greenhouse currently uses custom circular icons (○ ◎ ◉) — needs migration to Set D.
 
 ---
 
@@ -190,8 +200,13 @@ Run '<alias> <command> --help' for command-specific help.
 
 | Tool | Line 1 |
 |------|--------|
-| mulch | `mulch v0.6.3 — Structured expertise management` |
-| seeds | `seeds v0.2.5 — Git-native issue tracking` |
-| sapling | `sapling v0.3.0 — Headless coding agent` |
-| canopy | `canopy v0.2.1 — Prompt management & composition` |
-| overstory | `overstory v0.8.4 — Multi-agent orchestration` |
+| mulch | `mulch v0.10.0 — Structured expertise management` |
+| seeds | `seeds v0.4.4 — Git-native issue tracking` |
+| canopy | `canopy v0.2.4 — Prompt management & composition` |
+| sapling | `sapling v0.3.2 — Headless coding agent` |
+| burrow | `burrow v0.3.0 — OS-isolated sandbox runtime` |
+| overstory | `overstory v0.11.0 — Multi-agent orchestration` |
+| warren | `warren v0.3.0 — Self-hostable cloud control plane` |
+| greenhouse | `greenhouse v0.1.2 — Autonomous development daemon` |
+
+Note: Greenhouse does not yet implement Style A — uses Commander default help. Burrow and warren joined the ecosystem post-V1; Style A audit pending.
