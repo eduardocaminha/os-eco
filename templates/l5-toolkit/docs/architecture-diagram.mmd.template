@@ -1,0 +1,47 @@
+%% architecture-diagram.mmd
+%%
+%% Template — copy to <<REPO_NAME>>/docs/architecture.mmd and adapt every
+%% placeholder to the repo's real components. Closes the
+%% `service_flow_documented` Agent-Readiness criterion.
+%%
+%% Replaceable tokens:
+%%   <<REPO_NAME>>         the repo's short name (matches its directory)
+%%   <<USER_LABEL>>        what calls into the repo (user, CI, another agent)
+%%   <<ENTRY_LABEL>>       the entry-point module (CLI, HTTP, library)
+%%   <<CORE_LABEL>>        the main domain layer
+%%   <<STORE_LABEL>>       the persistence layer (SQLite, files, none)
+%%   <<EXTERNAL_LABEL>>    upstream/downstream system (omit edge if none)
+%%
+%% Render locally with `bunx @mermaid-js/mermaid-cli -i docs/architecture.mmd
+%% -o docs/architecture.png` or view inline on GitHub (mermaid is supported
+%% natively in fenced code blocks).
+
+flowchart LR
+    user["<<USER_LABEL>>"]
+    entry["<<ENTRY_LABEL>>"]
+    core["<<CORE_LABEL>>"]
+    store["<<STORE_LABEL>>"]
+    external["<<EXTERNAL_LABEL>>"]
+
+    user -->|"invokes"| entry
+    entry -->|"dispatches to"| core
+    core -->|"reads / writes"| store
+    core -->|"calls"| external
+
+    classDef component fill:#f8fafc,stroke:#0f172a,stroke-width:1px,color:#0f172a;
+    classDef edge fill:#e2e8f0,stroke:#334155,stroke-width:1px,color:#0f172a;
+    class user,external edge;
+    class entry,core,store component;
+
+%% --- Authoring notes ---------------------------------------------------
+%% 1. Keep the diagram boring. The goal is to orient a new agent in 30s,
+%%    not to capture every internal module.
+%% 2. Prefer flowchart LR over graph TD for left-to-right reading.
+%% 3. If the repo has no persistence layer, delete the `store` node and
+%%    the edge into it. If it has no external dependency, delete
+%%    `external`. Do not invent fake nodes to fill the template.
+%% 4. Add one or two more boxes if (and only if) they materially change
+%%    the mental model — e.g. a background worker that observes events,
+%%    or a sandbox primitive the entry point spawns.
+%% 5. Reference this file from AGENTS.md / README so agents and reviewers
+%%    can find it.

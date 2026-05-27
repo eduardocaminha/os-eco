@@ -1,0 +1,286 @@
+# RUNBOOK.md
+
+> Template — copy to `<<REPO_NAME>>/RUNBOOK.md` and replace every `<<TOKEN>>`
+> placeholder. Remove this blockquote when done. Closes the
+> `runbooks_documented` Agent-Readiness criterion.
+
+## Replaceable tokens
+
+| Token | Meaning |
+|-------|---------|
+| `<<REPO_NAME>>` | Repo short name. |
+| `<<PACKAGE_NAME>>` | npm package name (e.g. `@os-eco/<<REPO_NAME>>-cli`). |
+| `<<PRIMARY_BRANCH>>` | Default branch (almost always `main`). |
+| `<<RELEASE_WORKFLOW>>` | Path to the release workflow YAML. |
+| `<<TRACKER_PREFIX>>` | Repo-local tracker prefix (no trailing dash). |
+| `<<CHANGELOG_PATH>>` | Path to the changelog (usually `CHANGELOG.md`). |
+| `<<VERSION_SOURCES>>` | Files that must agree on the version (e.g. `package.json`, `src/index.ts`). |
+
+## Scope
+
+This runbook covers `<<REPO_NAME>>` operational procedures only:
+
+1. Cutting a release.
+2. Triaging a failed publish.
+3. Rolling back a bad release.
+
+For day-to-day development conventions, see `AGENTS.md`. For architecture,
+see `docs/architecture-diagram.mmd` (if present) or the upstream
+`SPEC.md` / `CLAUDE.md`.
+
+## Pre-flight (do once per machine)
+
+- `bun --version` ≥ the version in `package.json` `engines.bun`.
+- `gh auth status` → authenticated, with `repo` + `workflow` scopes.
+- `git remote -v` shows the canonical origin.
+- For npm publish: `npm whoami` → publisher account; 2FA enabled.
+- Local working tree on `<<PRIMARY_BRANCH>>`, fully up to date,
+  `git status` clean.
+
+## 1. Release procedure
+
+Cut releases from `<<PRIMARY_BRANCH>>` only. Never tag a feature branch.
+
+### 1.1 Decide the version
+
+Follow [SemVer](https://semver.org). Pick:
+
+- **MAJOR** for any backward-incompatible change to the public API
+  (CLI flags removed, exported types renamed, breaking config schema).
+- **MINOR** for new features or non-breaking additions.
+- **PATCH** for bug fixes, doc-only changes, internal refactors.
+
+`<<REPO_NAME>>` is pre-1.0 if `package.json` "version" starts with `0.`.
+While pre-1.0, breaking changes go in MINOR; additive changes go in PATCH.
+
+### 1.2 Update the version in every source of truth
+
+`<<VERSION_SOURCES>>` must all agree. The release workflow fails the job
+if they disagree.
+
+```bash
+# Example: package.json + src/index.ts (warren convention)
+sed -i '' 's/"version": ".*"/"version": "X.Y.Z"/' package.json
+# Then update VERSION constant manually if present.
+```
+
+Use `git diff` to confirm every version source moved to the new value.
+Commit on its own:
+
+```bash
+git add <<VERSION_SOURCES>>
+git commit -m "release: <<REPO_NAME>> X.Y.Z"
+```
+
+### 1.3 Update the changelog
+
+`<<CHANGELOG_PATH>>` must have an entry for the new version at the top.
+
+```markdown
+## X.Y.Z — YYYY-MM-DD
+
+### Added
+- ...
+
+### Changed
+- ...
+
+### Fixed
+- ...
+```
+
+Group changes under standard headings (Added / Changed / Fixed /
+Deprecated / Removed / Security). Link each entry to its
+`<<TRACKER_PREFIX>>-XXXX` or `#NNN` if relevant. Commit:
+
+```bash
+git add <<CHANGELOG_PATH>>
+git commit -m "release: changelog for X.Y.Z"
+```
+
+(Or squash both commits into one if your project prefers a single
+release commit — be consistent across releases.)
+
+### 1.4 Final gate check
+
+```bash
+bun install
+bun run lint
+bun run typecheck
+bun test
+bun run check:all
+```
+
+All four must exit 0. If any fails, **stop** — fix locally and re-run
+before continuing.
+
+### 1.5 Push to <<PRIMARY_BRANCH>>
+
+```bash
+git push origin <<PRIMARY_BRANCH>>
+```
+
+Pushing triggers `<<RELEASE_WORKFLOW>>`, which:
+
+1. Re-runs the gate suite in CI.
+2. Asserts every `<<VERSION_SOURCES>>` file agrees on `X.Y.Z`.
+3. Builds + publishes `<<PACKAGE_NAME>>` to npm (if applicable).
+4. Tags `vX.Y.Z` and creates a GitHub release with the
+   `<<CHANGELOG_PATH>>` section as the body.
+
+Watch the workflow run live:
+
+```bash
+gh run watch
+```
+
+### 1.6 Post-release sanity
+
+After the workflow finishes:
+
+```bash
+git pull --tags
+git tag --list | tail -5            # confirm vX.Y.Z is present
+gh release view vX.Y.Z               # confirm release page renders
+npm view <<PACKAGE_NAME>> version    # confirm the published version (if npm)
+```
+
+If `<<REPO_NAME>>` ships a CLI, smoke-install in a clean dir:
+
+```bash
+mkdir /tmp/<<REPO_NAME>>-smoke && cd /tmp/<<REPO_NAME>>-smoke
+bun install <<PACKAGE_NAME>>
+bunx <<PACKAGE_NAME>> --version
+```
+
+## 2. Triage of a failed publish
+
+When `<<RELEASE_WORKFLOW>>` exits non-zero:
+
+### 2.1 Read the log
+
+```bash
+gh run view --log-failed
+```
+
+Common failures and fixes:
+
+| Symptom | Likely cause | Fix |
+|---------|--------------|-----|
+| `version mismatch` | `<<VERSION_SOURCES>>` disagree | Sync versions, push fix commit. |
+| `npm publish ... 403` | Missing or expired `NPM_TOKEN` secret | Repository → Settings → Secrets → update `NPM_TOKEN`, re-run workflow. |
+| `npm publish ... E409` | Version already published | Bump to the next patch; do **not** unpublish a live version. |
+| `gh release create ... already exists` | Tag `vX.Y.Z` exists but a previous workflow created an incomplete release | Delete the orphan release in the GitHub UI, re-run the workflow. |
+| `tsc` / `biome` / `bun test` failure | Local greens diverged from CI | Reproduce locally with `bun run check:all`; do **not** force-push to `<<PRIMARY_BRANCH>>`. |
+| `gen:docs:check` / `gen:openapi:check` failure | Generated docs out of sync | `bun run gen:docs && bun run gen:openapi`; commit the diff. |
+
+### 2.2 Re-run the workflow
+
+After the fix commit lands on `<<PRIMARY_BRANCH>>`:
+
+```bash
+gh workflow run <<RELEASE_WORKFLOW>> --ref <<PRIMARY_BRANCH>>
+```
+
+Or push a no-op commit (`git commit --allow-empty -m "release: retry"`)
+if the workflow only triggers on push.
+
+### 2.3 If the publish half-succeeded
+
+If npm publish completed but `gh release create` failed (or vice versa),
+**do not unpublish**. Instead:
+
+- Create the missing GitHub release manually:
+  ```bash
+  gh release create vX.Y.Z --notes-file <(awk '/^## X.Y.Z/,/^## /' <<CHANGELOG_PATH>>)
+  ```
+- Or, if npm has the version but the tag is missing:
+  ```bash
+  git tag vX.Y.Z
+  git push origin vX.Y.Z
+  ```
+
+Record the deviation in `<<TRACKER_PREFIX>>-XXXX` so future operators
+know the half-step happened.
+
+## 3. Rollback
+
+A "rollback" never means unpublishing. npm and git tags are immutable.
+Rollback means **publishing a corrective version**.
+
+### 3.1 Decide the severity
+
+- **Critical** (data loss, security, total breakage): cut a new patch
+  release reverting the change, in under 30 minutes.
+- **High** (regression, broken feature on common path): cut a patch
+  within the day.
+- **Medium/Low**: fix forward on the next planned release.
+
+### 3.2 Revert the offending commits
+
+```bash
+git checkout <<PRIMARY_BRANCH>>
+git pull
+git log --oneline -10
+git revert <bad-sha>           # creates a new commit, preserves history
+```
+
+If the bad release is `X.Y.Z`, the revert commit goes into the work for
+`X.Y.(Z+1)`.
+
+### 3.3 Cut a follow-up release
+
+Follow §1.1–§1.5. Note the rollback explicitly in
+`<<CHANGELOG_PATH>>`:
+
+```markdown
+## X.Y.(Z+1) — YYYY-MM-DD
+
+### Fixed
+- Reverted <bad-commit-summary> from X.Y.Z which caused <symptom>.
+  Tracking in <<TRACKER_PREFIX>>-XXXX.
+```
+
+### 3.4 Deprecate the bad version on npm
+
+If `<<PACKAGE_NAME>>` is on npm and the bad version is dangerous:
+
+```bash
+npm deprecate <<PACKAGE_NAME>>@X.Y.Z "Critical bug; install X.Y.(Z+1) or later. See <<CHANGELOG_PATH>>."
+```
+
+`npm deprecate` does not remove the version (which would break
+deterministic installs); it surfaces a warning at install time.
+
+### 3.5 Communicate
+
+- Update the GitHub release notes for `vX.Y.Z` with a banner:
+  `> ⚠️ This release contains a regression. Use vX.Y.(Z+1) or later.`
+- File `<<TRACKER_PREFIX>>-XXXX` with root cause + remediation links.
+- If the project has a Discussions / changelog channel, post a short
+  note linking to the corrective release.
+
+## Appendix — Common commands
+
+```bash
+# Inspect recent releases
+git tag --sort=-creatordate | head -5
+gh release list --limit 5
+
+# Inspect a failing workflow run
+gh run list --workflow=<<RELEASE_WORKFLOW>> --limit 5
+gh run view <run-id> --log-failed
+
+# Re-run a single failed job
+gh run rerun <run-id> --failed
+```
+
+## Appendix — Pre-publish checklist (copy-paste into release PR body)
+
+- [ ] `<<VERSION_SOURCES>>` updated to X.Y.Z.
+- [ ] `<<CHANGELOG_PATH>>` has a dated X.Y.Z section.
+- [ ] `bun run check:all` exits 0 locally.
+- [ ] `gh run watch` confirmed the release workflow succeeded.
+- [ ] `npm view <<PACKAGE_NAME>> version` reports X.Y.Z (if npm).
+- [ ] Smoke install in a clean dir succeeds.
+- [ ] GitHub release page renders the changelog section correctly.

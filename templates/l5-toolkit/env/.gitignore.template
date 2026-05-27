@@ -1,0 +1,57 @@
+# .gitignore — L5 toolkit baseline
+#
+# Template — append these entries to `<<REPO_NAME>>/.gitignore`. Do NOT
+# replace the existing .gitignore: each sub-repo has repo-specific
+# patterns that must be preserved. The lines below close the
+# `gitignore_comprehensive` Agent-Readiness criterion.
+#
+# When porting:
+#   1. Read the target repo's existing .gitignore.
+#   2. Add only the lines below that are missing.
+#   3. Keep the section comments — they help future maintainers see why
+#      each block is present.
+
+# ---- secrets & env -------------------------------------------------
+.env
+.env.*
+!.env.example
+!.env.example.template
+
+# ---- node / bun ----------------------------------------------------
+node_modules/
+.bun/
+bun.lockb.bak
+
+# ---- build / dist --------------------------------------------------
+dist/
+build/
+*.tsbuildinfo
+
+# ---- test artifacts ------------------------------------------------
+coverage/
+test-results/
+junit.xml
+*.lcov
+
+# ---- IDE / editor --------------------------------------------------
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# ---- OS noise ------------------------------------------------------
+.DS_Store
+Thumbs.db
+ehthumbs.db
+desktop.ini
+
+# ---- logs ----------------------------------------------------------
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.run-plan-logs/
+
+# ---- agent-local scratch (per-repo conventions add here too) -------
+.factory-mission-scratch/
+.claude/settings.local.json
