@@ -70,11 +70,9 @@ Tool name bold, description dim.
 ```
 
 Use in:
-- Root-level README
-- `ov ecosystem` dashboard
 - Website / docs landing page
 
-Note: `logo.png` / `logo@2x.png` still show the original six layers — regenerate via `generate-logo.py` to include burrow + warren.
+Note: the rendered PNG logo (`logo.png` / `logo@2x.png`) and its `generate-logo.py` generator were retired 2026-05. Only this ASCII form remains as a spec.
 
 ---
 

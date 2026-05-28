@@ -11,10 +11,6 @@
 
 A self-hostable control plane for AI coding agents — and the integrated toolchain it sits on top of.
 
-<p align="center">
-  <img src="branding/logo.png" alt="os-eco" width="444" />
-</p>
-
 ## Warren — the agent control plane
 
 [**Warren**](https://github.com/jayminwest/warren) is the headline project. Point it at a GitHub repo, pick an agent, write a prompt; warren spawns the agent inside a sandbox, streams events back to a live UI, lets you steer mid-run, and pushes the workspace branch when it's done.
