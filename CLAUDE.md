@@ -1,12 +1,12 @@
 # os-eco
 
-Meta-project for the AI agent tooling ecosystem. This repo tracks cross-cutting concerns across **eight integrated tools**, each living in its own sub-repo. (A ninth tool, **greenhouse**, was archived 2026-05 — see "Retired tools" below.)
+Meta-project for the AI agent tooling ecosystem. This repo tracks cross-cutting concerns across **seven integrated tools**, each living in its own sub-repo. (Two further tools, **greenhouse** and **overstory**, have been archived — see "Retired tools" below.)
 
 **Warren is the headline project.** It is the self-hostable control plane that orchestrates ephemeral cloud agents and closes the autonomous loop (GitHub → dispatch → PR). The rest of os-eco is the toolchain warren stands on. Each piece works standalone too, but warren is where the ecosystem narrative begins.
 
 ## Ecosystem Overview
 
-Tools group by role: **warren** is the flagship orchestrator. Underneath sit the **substrate** (sandbox + coordination), the **context primitives** (what agents read & write), and a **runtime** (single-agent execution). **Overstory** is an alternative local-first orchestrator.
+Tools group by role: **warren** is the flagship orchestrator. Underneath sit the **substrate** (sandbox + coordination), the **context primitives** (what agents read & write), and a **runtime** (single-agent execution).
 
 ### Flagship — agent control plane
 
@@ -35,12 +35,6 @@ Tools group by role: **warren** is the flagship orchestrator. Underneath sit the
 |------|-----|-----|---------|----------|
 | **Sapling** | `sapling` / `sp` | `@os-eco/sapling-cli` | Headless coding agent with proactive context management. Alternative runtime warren can dispatch alongside Claude Code. | `sapling/` |
 
-### Alternative orchestrator
-
-| Tool | CLI | npm | Purpose | Sub-repo |
-|------|-----|-----|---------|----------|
-| **Overstory** | `overstory` / `ov` | `@os-eco/overstory-cli` | Local-first multi-agent orchestration via tmux + git worktrees. Choose over warren when you want a local-only workflow with no HTTP control plane. | `overstory/` |
-
 ### How they fit together
 
 ```
@@ -62,17 +56,15 @@ Tools group by role: **warren** is the flagship orchestrator. Underneath sit the
 - **Seeds** is the issue tracker — `sd create` / `sd ready` / `sd close` drive the work queue.
 - **Canopy** is the prompt library — `cn emit` renders prompts for agent consumption.
 - **Sapling** is an alternative coding agent runtime.
-- **Overstory** is the local-first orchestrator — tmux + git worktrees, top-down decomposition, SQLite mail.
 
 Each sub-repo has its own `CLAUDE.md` with tool-specific conventions, architecture, and commands.
 
 ## Root-Level Tool Instances
 
-The root `.mulch/`, `.seeds/`, `.canopy/`, and `.overstory/` directories are for **cross-repo concerns**:
+The root `.mulch/`, `.seeds/`, and `.canopy/` directories are for **cross-repo concerns**:
 - Use root `.seeds/` for ecosystem-wide issues (integration bugs, cross-tool features)
 - Use root `.mulch/` for ecosystem-level expertise (the `ecosystem` domain)
 - Use root `.canopy/` for shared prompt templates
-- Use root `.overstory/` for multi-repo orchestration
 
 ## Build & Test Commands
 
@@ -86,16 +78,16 @@ cd mulch       && bun test && bun run lint && bun run typecheck
 cd seeds       && bun test && bun run lint && bun run typecheck
 cd canopy      && bun test && bun run lint && bun run typecheck
 cd sapling     && bun test && bun run lint && bun run typecheck
-cd overstory   && bun test && bun run lint && bun run typecheck
 ```
 
 ## Retired tools
 
 - **Greenhouse** (`greenhouse` / `grhs`, `@os-eco/greenhouse-cli`) — archived 2026-05. Was the autonomous development daemon (GitHub poll → dispatch → PR). Superseded by warren, which absorbed the autonomous-loop role into the same control plane that runs cloud agents. The greenhouse GitHub repo (https://github.com/jayminwest/greenhouse) is archived and readable for historical context; the npm package was never published; the local sub-repo was removed. Records and seeds issues that reference greenhouse are kept for traceability but marked obsolete.
+- **Overstory** (`overstory` / `ov`, `@os-eco/overstory-cli`) — archived 2026-05. Was the local-first multi-agent orchestrator (tmux + git worktrees, top-down decomposition, SQLite mail). The most popular tool in the ecosystem by stars, but development wound down in favor of warren as the go-forward orchestrator. The overstory GitHub repo (https://github.com/jayminwest/overstory) is archived read-only and remains MIT-licensed for anyone who wants to fork it; the published `@os-eco/overstory-cli` npm package stays up; the local sub-repo was removed. Records and seeds issues that reference overstory are kept for traceability.
 
 ## Scripts
 
-- `scripts/run-plan.sh <plan-id>` — sequential, non-parallel alternative to `ov sling`. For each open child of a seeds plan, runs `claude -p "work on sd <id>..."` with `--permission-mode bypassPermissions`, logs to `.run-plan-logs/<plan>/<id>.log`, stops on the first non-zero exit. Idempotent: skips closed children on re-runs. Requires `sd`, `claude`, `jq` on PATH.
+- `scripts/run-plan.sh <plan-id>` — sequentially work a seeds plan. For each open child of a seeds plan, runs `claude -p "work on sd <id>..."` with `--permission-mode bypassPermissions`, logs to `.run-plan-logs/<plan>/<id>.log`, stops on the first non-zero exit. Idempotent: skips closed children on re-runs. Requires `sd`, `claude`, `jq` on PATH.
 
 ## L5 Toolkit
 

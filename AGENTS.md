@@ -4,10 +4,10 @@ Guidance for AI agents (and humans) working in the **os-eco** meta-repo.
 
 os-eco is the meta-project for the AI agent tooling ecosystem. It has **no
 package.json, no source, and no test suite of its own** — it is a thin
-coordination layer that tracks cross-cutting concerns across **eight
-integrated tools**, each of which lives in its own independent sub-repo. (A
-ninth tool, **greenhouse**, was archived 2026-05 — see "Retired tools"
-below.) When an agent works here, it is almost always editing root-level docs,
+coordination layer that tracks cross-cutting concerns across **seven
+integrated tools**, each of which lives in its own independent sub-repo. (Two
+further tools, **greenhouse** and **overstory**, have been archived — see
+"Retired tools" below.) When an agent works here, it is almost always editing root-level docs,
 governance scaffolding, or cross-repo coordination state — not tool source.
 
 **Warren is the headline project.** It is the self-hostable control plane that
@@ -26,7 +26,6 @@ narrative begins.
 Tools group by role: **warren** is the flagship orchestrator. Underneath sit
 the **substrate** (sandbox + coordination), the **context primitives** (what
 agents read & write), and a **runtime** (single-agent execution).
-**Overstory** is an alternative local-first orchestrator.
 
 ### Flagship — agent control plane
 
@@ -55,12 +54,6 @@ agents read & write), and a **runtime** (single-agent execution).
 |------|-----|-----|---------|----------|
 | **Sapling** | `sapling` / `sp` | `@os-eco/sapling-cli` | Headless coding agent with proactive context management. Alternative runtime warren can dispatch alongside Claude Code. | `sapling/` |
 
-### Alternative orchestrator
-
-| Tool | CLI | npm | Purpose | Sub-repo |
-|------|-----|-----|---------|----------|
-| **Overstory** | `overstory` / `ov` | `@os-eco/overstory-cli` | Local-first multi-agent orchestration via tmux + git worktrees. Choose over warren when you want a local-only workflow with no HTTP control plane. | `overstory/` |
-
 ### How they fit together
 
 ```
@@ -85,15 +78,14 @@ agents read & write), and a **runtime** (single-agent execution).
 - **Seeds** is the issue tracker — `sd create` / `sd ready` / `sd close`.
 - **Canopy** is the prompt library — `cn emit` renders prompts for agents.
 - **Sapling** is an alternative coding-agent runtime.
-- **Overstory** is the local-first orchestrator (tmux + git worktrees).
 
 ## Root-Level Commands
 
 There is no build/test at the os-eco root. The commands an agent runs here are
 coordination tooling and the per-repo session-prime rituals:
 
-- `scripts/run-plan.sh <plan-id>` — sequential, non-parallel alternative to
-  `ov sling`. For each open child of a seeds plan, runs `claude -p` with
+- `scripts/run-plan.sh <plan-id>` — sequentially work a seeds plan. For each
+  open child of the plan, runs `claude -p` with
   `--permission-mode bypassPermissions`, logs to
   `.run-plan-logs/<plan>/<id>.log`, and stops on the first non-zero exit.
   Idempotent: skips closed children on re-runs. Requires `sd`, `claude`, `jq`.
@@ -109,14 +101,13 @@ cd <tool> && bun test && bun run lint && bun run typecheck
 
 ## Cross-Cutting Tool Directories (root vs sub-repo)
 
-The root `.mulch/`, `.seeds/`, `.canopy/`, and `.overstory/` directories hold
+The root `.mulch/`, `.seeds/`, and `.canopy/` directories hold
 **cross-repo** concerns only:
 
 - Root `.seeds/` — ecosystem-wide issues (integration bugs, cross-tool
   features). Per-tool issues go in each sub-repo's own `.seeds/`.
 - Root `.mulch/` — ecosystem-level expertise (the `ecosystem` domain).
 - Root `.canopy/` — shared prompt templates.
-- Root `.overstory/` — multi-repo orchestration state.
 
 When a change spans multiple tools, file a root-level seeds issue to track the
 integration.
@@ -126,7 +117,7 @@ integration.
 - Sub-repos are independently versioned and managed — each has its own git
   history. **They are off-limits to root-scoped commits.**
 - The root git repo gitignores all sub-repo directories (`warren/`, `burrow/`,
-  `plot/`, `mulch/`, `seeds/`, `canopy/`, `sapling/`, `overstory/`). A
+  `plot/`, `mulch/`, `seeds/`, `canopy/`, `sapling/`). A
   root-scoped commit must never include a path inside one of those.
 - Cross-repo issues go in root `.seeds/`; per-tool issues go in each
   sub-repo's `.seeds/`.
@@ -141,6 +132,16 @@ integration.
   historical context; the npm package was never published; the local sub-repo
   was removed. Records and seeds issues that reference greenhouse are kept for
   traceability but marked obsolete.
+- **Overstory** (`overstory` / `ov`, `@os-eco/overstory-cli`) — archived
+  2026-05. Was the local-first multi-agent orchestrator (tmux + git worktrees,
+  SQLite mail, tiered conflict resolution). The most-starred tool in the
+  ecosystem, but development wound down in favor of **warren** as the
+  go-forward orchestrator. The overstory GitHub repo
+  (https://github.com/jayminwest/overstory) is archived read-only and stays
+  MIT-licensed for anyone who wants to fork it; the published
+  `@os-eco/overstory-cli` npm package remains up; the local sub-repo was
+  removed. Records and seeds issues that reference overstory are kept for
+  traceability.
 
 ## See also
 
