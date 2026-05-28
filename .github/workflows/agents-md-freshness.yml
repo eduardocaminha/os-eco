@@ -1,0 +1,98 @@
+name: agents-md-freshness
+
+# Validates that AGENTS.md and CLAUDE.md at the repo root stay accurate.
+# This is the closest a docs-only meta-repo gets to a "test suite": if
+# either doc references a script or path that no longer exists, the PR
+# fails. Mirrors the verification block from seeds issue `os-eco-3ce3`.
+#
+# Triggers on any change to root docs, governance scaffolding, or the
+# `scripts/` directory. Runs as a required status check on `main`.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  governance-presence:
+    name: Governance files present
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Verify governance scaffolding (mirrors os-eco-3ce3 seal block)
+        run: |
+          set -euo pipefail
+
+          fail() { echo "::error::$*"; exit 1; }
+          assert_file() {
+            test -s "$1" || fail "missing or empty: $1"
+          }
+          assert_grep() {
+            grep -qE "$1" "$2" || fail "pattern '$1' not found in $2"
+          }
+          assert_grep_i() {
+            grep -qiE "$1" "$2" || fail "pattern '$1' (case-insensitive) not found in $2"
+          }
+
+          assert_file AGENTS.md
+          test "$(wc -c < AGENTS.md)" -gt 2048 || fail "AGENTS.md under 2KB"
+          assert_grep_i "ecosystem" AGENTS.md
+
+          assert_file .github/dependabot.yml
+          assert_grep "github-actions" .github/dependabot.yml
+
+          assert_file .github/pull_request_template.md
+          assert_grep_i "Summary" .github/pull_request_template.md
+          assert_grep_i "Changes" .github/pull_request_template.md
+          assert_grep_i "Test plan" .github/pull_request_template.md
+
+          assert_file .github/ISSUE_TEMPLATE/bug_report.yml
+          assert_file .github/ISSUE_TEMPLATE/feature_request.yml
+          assert_file .github/ISSUE_TEMPLATE/config.yml
+
+          assert_file .github/labels.yml
+          assert_grep "priority/P0" .github/labels.yml
+          assert_file .github/workflows/sync-labels.yml
+
+          assert_grep "^\.env\$" .gitignore
+          assert_grep "^\.env\.\*" .gitignore
+          assert_grep "^\.idea/\$" .gitignore
+          assert_grep "^\.vscode/\$" .gitignore
+          assert_grep "^\.DS_Store\$" .gitignore
+          assert_grep "^\*\.log\$" .gitignore
+          assert_grep "^burrow/\$" .gitignore
+          assert_grep "^warren/\$" .gitignore
+
+          echo "All governance assertions passed."
+
+  reference-validity:
+    name: AGENTS.md / CLAUDE.md references resolve
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Verify every scripts/ path mentioned in agent docs exists
+        run: |
+          set -euo pipefail
+          missing=0
+          for doc in AGENTS.md CLAUDE.md README.md; do
+            [ -f "$doc" ] || continue
+            while IFS= read -r path; do
+              [ -z "$path" ] && continue
+              if [ ! -e "$path" ]; then
+                echo "::error file=$doc::referenced path does not exist: $path"
+                missing=$((missing + 1))
+              fi
+            done < <(grep -oE 'scripts/[A-Za-z0-9_./-]+' "$doc" | sort -u)
+          done
+          if [ "$missing" -gt 0 ]; then
+            echo "Found $missing stale scripts/ reference(s) in agent docs."
+            exit 1
+          fi
+          echo "All scripts/ references resolve."

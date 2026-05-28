@@ -1,0 +1,70 @@
+name: code-scanning
+
+# Static analysis for the os-eco meta-repo. The repo has no application
+# source code, so the surface is intentionally small:
+#
+#   - CodeQL (language: actions) — analyses every workflow YAML under
+#     `.github/workflows/` for misuse of secrets, untrusted inputs,
+#     script-injection sinks, and the standard set of actions queries.
+#     Results upload to the GitHub Security tab.
+#   - actionlint — lint workflow YAML for syntax / shell snippet errors.
+#   - shellcheck — lint the handful of shell scripts under `scripts/`.
+#
+# Treated as a required status check on `main` (see branch protection).
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  schedule:
+    - cron: "0 6 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  security-events: write
+  actions: read
+
+jobs:
+  codeql:
+    name: CodeQL (actions)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: actions
+          queries: security-and-quality
+
+      - name: Analyze
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: /language:actions
+
+  actionlint:
+    name: actionlint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Run actionlint
+        run: |
+          bash <(curl -fsSL https://raw.githubusercontent.com/rhysd/actionlint/main/scripts/download-actionlint.bash)
+          ./actionlint -color
+
+  shellcheck:
+    name: shellcheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Run shellcheck on scripts/
+        run: |
+          if compgen -G "scripts/*.sh" > /dev/null; then
+            shellcheck scripts/*.sh
+          else
+            echo "No scripts/*.sh files found — skipping."
+          fi
