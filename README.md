@@ -160,6 +160,7 @@ os-eco/
   sapling/         # sub-repo: @os-eco/sapling-cli        — headless agent
   overstory/       # sub-repo: @os-eco/overstory-cli      — local orchestrator
   branding/        # shared visual spec, CLI standards, checklists
+  templates/       # portable templates; see templates/l5-toolkit/ for the L5 readiness kit
   .mulch/          # ecosystem-level expertise
   .seeds/          # ecosystem-level issues
   .canopy/         # shared prompt templates

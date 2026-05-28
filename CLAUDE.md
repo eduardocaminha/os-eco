@@ -97,6 +97,36 @@ cd overstory   && bun test && bun run lint && bun run typecheck
 
 - `scripts/run-plan.sh <plan-id>` — sequential, non-parallel alternative to `ov sling`. For each open child of a seeds plan, runs `claude -p "work on sd <id>..."` with `--permission-mode bypassPermissions`, logs to `.run-plan-logs/<plan>/<id>.log`, stops on the first non-zero exit. Idempotent: skips closed children on re-runs. Requires `sd`, `claude`, `jq` on PATH.
 
+## L5 Toolkit
+
+`templates/l5-toolkit/` is the canonical source of portable
+**Level 5 agent-readiness** artifacts. It is a template tree (not a published
+package), extracted from `warren/` — the reference L5 implementation — and
+parameterized so its contents drop cleanly into any Bun + TypeScript sub-repo
+during the L5 uplift mission. Consumers copy artifacts out and adapt
+budgets/thresholds/tracker prefixes to their target repo; nothing depends on
+this directory at runtime. See
+[`templates/l5-toolkit/README.md`](templates/l5-toolkit/README.md) for the
+full per-criterion mapping and copy-order checklist.
+
+What's inside (seven subdirectories plus a root snippet):
+
+- `scripts/` — ratchet scripts (file-size, debt-markers, coverage), reporters
+  (test-timing, quality-metrics), and the AGENTS.md validator, each with a
+  co-located test suite.
+- `budgets/` — JSON budget templates consumed by the ratchet scripts.
+- `configs/` — drop-in baselines for Biome, knip, jscpd, bunfig, and a strict
+  `tsconfig.base.json`.
+- `github/` — governance artifacts: `dependabot.yml`, `ISSUE_TEMPLATE/`,
+  `pull_request_template.md`, `labels.yml`, and the `ci.yml` / `sync-labels.yml`
+  workflows.
+- `docs/` — `AGENTS.md`, `RUNBOOK.md`, and architecture-diagram templates.
+- `env/` — `.env.example` and `.gitignore` baseline templates.
+- `skills/` — guidance for authoring real `.factory/skills/<name>/SKILL.md`
+  files per repo.
+- `package-scripts.json` — the canonical `check:*` / `test:ci` / `prepare`
+  scripts merged into each sub-repo's `package.json`.
+
 ## Conventions
 
 - Sub-repos are independently versioned and managed — each has its own git history
